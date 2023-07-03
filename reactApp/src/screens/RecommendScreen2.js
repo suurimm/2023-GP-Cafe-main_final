@@ -15,16 +15,41 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 //import RNPickerSelect from 'react-native-picker-select';
 //import { Dropdown } from 'react-native-picker-select';
 //import DropDownPicker from 'react-native-dropdown-picker';
-//RecommendScren에서 버튼을 누른 후 넘어오는 화면
+//RecommendScreen에서 버튼을 누른 후 넘어오는 화면
 
 const RecommendScreen2 = () => {
+  const handleDistance = (x, y) => {
+    const haversine = require('haversine');
+
+    const start = {
+      latitude: selectedLocation.latitude,
+      longitude: selectedLocation.longitude,
+    };
+    const end = {
+      latitude: x,
+      longitude: y,
+    };
+
+    const distance = haversine(start, end, { unit: 'meter' });
+
+    return Math.round(distance);
+  };
+
+  //const distanceSort = (data.d)
+
+  //console.log(data.distance);
+
   let apple = [];
+  let data = [];
+  //let fetchData;
   const route = useRoute();
-  const { firstSelect, secondSelect, addressSelect } = route.params;
+  const { firstSelect, secondSelect, selectedLocation, address } = route.params;
 
   const [cafeData, setCafeData] = useState([]);
 
   const order = ['관련도순', '가까운순', '찜많은순'];
+  const [orderSelect, setOrderSelect] = useState('관련도순');
+
   //const [orderSelect, setOrderSelect] = useState('');
 
   const [buttonList, setButtonList] = useState({
@@ -78,17 +103,29 @@ const RecommendScreen2 = () => {
         }
 
         const response = await fetch(url);
-        const data = await response.json();
+        data = await response.json();
 
+        for (let i = 0; i < data.length; i++) {
+          data[i].distance = handleDistance(data[i].lat, data[i].lng);
+          // console.log(data[i]);
+        }
+
+        if (orderSelect == '가까운순') {
+          data.sort((a, b) => a.distance - b.distance);
+        }
         setCafeData(data);
+        //console.log('data:', data);
       } catch (error) {
         console.error(error);
       }
     };
     fetchData();
-  }, [secondSelect]);
+  }, [secondSelect, orderSelect]);
+
+  //console.log('test:', data);
 
   const handleButtonPress = async (buttonKey) => {
+    // newitem = [];
     const updatedButtonList = { ...buttonList };
     updatedButtonList[buttonKey] = updatedButtonList[buttonKey] === 0 ? 1 : 0;
     setButtonList(updatedButtonList);
@@ -112,10 +149,25 @@ const RecommendScreen2 = () => {
         //console.log(jsonResponse);
 
         console.log(updatedButtonList);
+
         apple = await response.json();
         //setCafeData([]);
+        // console.log(apple);
+        for (let i = 0; i < apple.length; i++) {
+          apple[i].distance = handleDistance(apple[i].lat, apple[i].lng);
+          //console.log(apple[i].distance);
+        }
+
+        if (orderSelect == '가까운순') {
+          apple.sort((a, b) => a.distance - b.distance);
+        }
+
+        //console.log(`apple : `, apple);
+
+        //apple.distance((a, b) => a - b);
+        //console.log(apple.distance);
         setCafeData(apple);
-        console.log(apple);
+
         //setCafeData(apple);
         //console.log('TEST: ', response.body.updatedButtonList);
       } else {
@@ -124,7 +176,11 @@ const RecommendScreen2 = () => {
     } catch (error) {
       console.error(error);
     }
+    return apple;
   };
+
+  console.log('apple', apple);
+
   /*const orderItems = [
     { label: '관련도순', value: '관련도순' },
     { label: '가까운순', value: '가까운순' },
@@ -141,7 +197,9 @@ const RecommendScreen2 = () => {
     <SafeAreaView style={styles.container}>
       <SafeAreaView style={styles.loca_content}>
         <MaterialIcons style={styles.loca_icon} name="location-on" size={30} />
-        <Text style={styles.address}>{addressSelect}</Text>
+        <Text style={styles.address}>
+          {selectedLocation && `위치: ${address}`}
+        </Text>
       </SafeAreaView>
       <SafeAreaView style={styles.purpose_content}>
         <Text style={styles.purpose}>
@@ -165,6 +223,14 @@ const RecommendScreen2 = () => {
           }}
           //rowStyle={{ borderBottomColor: 'gray', borderBottomWidth: 1 }}
           onSelect={(selectedItem) => {
+            setOrderSelect(selectedItem);
+            console.log('data : ', data);
+
+            if (selectedItem == '가까운순') {
+              //apple.distance.sort((a, b) => a - b);
+              //console.log(apple[0].distance);
+            }
+
             console.log(selectedItem);
           }}
           buttonTextAfterSelection={(selectedItem) => {
@@ -297,7 +363,10 @@ const RecommendScreen2 = () => {
 
       <FlatList
         data={cafeData}
-        renderItem={({ item }) => <RecommendList item={[item]} />}
+        //extraData={this.cafeData}
+        renderItem={({ item }) => (
+          <RecommendList item={[item]} selectedLocation={selectedLocation} />
+        )}
         keyExtractor={(item, datacid) => datacid.toString()}
       />
     </SafeAreaView>

@@ -8,18 +8,59 @@ import {
 import PropTypes from 'prop-types';
 import { MaterialIcons } from '@expo/vector-icons';
 import { Picker } from '@react-native-picker/picker';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigation } from '@react-navigation/native';
+//import MapScreen from './MapScreen';
+import Geocoder from 'react-native-geocoding';
+
+Geocoder.init('AIzaSyBIV79qlfKN64XfXLYM4AMzXs9rMKsDobg');
 
 const RecommendScreen = () => {
+  const [selectedLocation, setSelectedLocation] = useState(null);
+  const [address, setAddress] = useState('');
+
   const navigation = useNavigation();
+
+  const handleLocationSelected = (location) => {
+    setSelectedLocation(location);
+  };
+
+  const handleAddress = () => {
+    navigation.navigate('MapScreen', {
+      onLocationSelected: handleLocationSelected,
+      navigation: navigation,
+    });
+  };
+
+  useEffect(() => {
+    const getAddressFromCoordinates = async () => {
+      try {
+        const response = await Geocoder.from(
+          selectedLocation.latitude,
+          selectedLocation.longitude
+        );
+        if (response.results.length > 0) {
+          setAddress(response.results[0].formatted_address);
+        }
+      } catch (error) {
+        console.error(error);
+      }
+      console.log('address : ', address);
+    };
+
+    getAddressFromCoordinates();
+  }, [selectedLocation, address]);
 
   const onSubmit = async () => {
     if (!firstSelect || !secondSelect) {
       Alert.alert('알림', '목적을 선택해주세요.');
       return;
     }
-
+    if (!selectedLocation) {
+      Alert.alert('알림', '위치를 선택해주세요');
+      return;
+    }
+    /*
     try {
       const response = await fetch('http://localhost:3000/', {
         method: 'POST',
@@ -36,15 +77,17 @@ const RecommendScreen = () => {
         const data = await response.json();
         console.log(data);
       } else {
-        console.warn('서버 응답에 실패했습니다.');
+        throw new Error('서버 응답에 실패했습니다.');
       }
     } catch (error) {
       console.error(error);
     }
+*/
     navigation.navigate('RecommendScreen2', {
       firstSelect: firstSelect,
       secondSelect: secondSelect,
-      addressSelect: addressSelect,
+      selectedLocation: selectedLocation,
+      address: address,
     });
     //console.log(firstSelect);
     //console.log(secondSelect);
@@ -53,7 +96,7 @@ const RecommendScreen = () => {
 
   const [firstSelect, setFirstSelect] = useState('');
   const [secondSelect, setSecondSelect] = useState('');
-  const [addressSelect, setAddressSelect] = useState('청파로 47길 100');
+  //const [addressSelect, setAddressSelect] = useState('청파로 47길 100');
 
   const handleFirstPickerChange = (itemValue) => {
     setFirstSelect(itemValue);
@@ -70,14 +113,16 @@ const RecommendScreen = () => {
         <SafeAreaView style={styles.address_content}>
           <TouchableOpacity
             style={styles.touch_content}
-            onPress={() => console.log('주소 버튼 눌림')}
+            onPress={handleAddress}
           >
             <MaterialIcons
               style={styles.loca_icon}
               name="location-on"
               size={40}
             />
-            <Text style={styles.address}>{addressSelect}</Text>
+            <Text style={styles.address}>
+              {selectedLocation ? `위치: ${address}` : '위치 설정하기'}
+            </Text>
           </TouchableOpacity>
         </SafeAreaView>
         <Text style={styles.text}>카페를 방문하는 목적을 선택해주세요.</Text>
@@ -115,7 +160,7 @@ const RecommendScreen = () => {
               selectedValue={secondSelect}
               onValueChange={handleSecondPickerChange}
             >
-              <Picker.Item label="(1인) 공부, 작업, 업무" value="study'" />
+              <Picker.Item label="(1인) 공부, 작업, 업무" value="study" />
               <Picker.Item label="(다수) 팀플, 회의, 스터디" value="team" />
             </Picker>
           </SafeAreaView>

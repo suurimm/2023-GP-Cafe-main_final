@@ -1,10 +1,11 @@
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import AuthStack from './AuthStack';
+import RecommStack from './RecommStack';
+import LoginStack from './LoginStack';
 //import RecommendScreen from '../screens/RecommendScreen';
 import PriceScreen from '../screens/PriceScreen';
 import HomeScreen from '../screens/HomeScreen';
 import LikeScreen from '../screens/LikeScreen';
-import ProfileScreen from '../screens/ProfileScreen';
+//import ProfileScreen from '../screens/ProfileScreen';
 import { ContentRoutes } from './routes';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
@@ -19,7 +20,7 @@ const ContentTab = () => {
     <Tab.Navigator>
       <Tab.Screen
         name={ContentRoutes.RECOMMEND}
-        component={AuthStack}
+        component={RecommStack}
         options={{
           tabBarIcon: (props) => getTabBarIcon({ ...props, name: 'coffee' }),
           headerShown: false,
@@ -53,7 +54,7 @@ const ContentTab = () => {
       />
       <Tab.Screen
         name={ContentRoutes.PROFILE}
-        component={ProfileScreen}
+        component={LoginStack}
         options={{
           tabBarIcon: (props) =>
             getTabBarIcon({ ...props, name: 'account-circle' }),

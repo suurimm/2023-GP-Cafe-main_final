@@ -1,22 +1,20 @@
-import { memo } from 'react';
+import { memo, useState } from 'react';
 import { StyleSheet, View, Text, Image } from 'react-native';
 import PropTypes from 'prop-types';
 
 const RecommendList = memo(({ item }) => {
-  //console.log('RecommendList 렌더링 : ', { item });
-
   return (
     <View style={styles.container}>
       {item.map((innerItem, id) => (
         <View key={id} style={styles.item}>
           <View style={styles.column1}>
-            <Text style={styles.distance}>410m</Text>
-            {/*<Text style={styles.distance}>{item.distance}</Text>*/}
+            <Text style={styles.distance}>{innerItem.distance} m</Text>
             <Image
               style={styles.image}
               //source={require('../assets/cafe.png')}
               source={{
                 uri: innerItem.imgsrc,
+
                 //uri: 'https://search.pstatic.net/common/?autoRotate=true&quality=95&type=f180_180&src=https%3A%2F%2Fldb-phinf.pstatic.net%2F20230406_209%2F1680777223044lYM6Q_JPEG%2F42205B3A-7238-49D6-8CEC-3304C60BF2B5.jpeg',
               }}
             />
@@ -47,7 +45,6 @@ RecommendList.displayName = 'RecommendList';
 RecommendList.propTypes = {
   item: PropTypes.arrayOf(
     PropTypes.shape({
-      //distance: PropTypes.string.isRequired,
       imgsrc: PropTypes.string.isRequired,
       카페명: PropTypes.string.isRequired,
       네이버주소: PropTypes.string.isRequired,
@@ -56,6 +53,10 @@ RecommendList.propTypes = {
       TOP3: PropTypes.string.isRequired,
     })
   ).isRequired,
+  selectedLocation: PropTypes.shape({
+    latitude: PropTypes.number.isRequired,
+    longitude: PropTypes.number.isRequired,
+  }).isRequired,
 };
 
 const styles = StyleSheet.create({

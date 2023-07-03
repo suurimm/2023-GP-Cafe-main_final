@@ -1,9 +1,13 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { StyleSheet, Text, SafeAreaView, TouchableOpacity } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 import * as Location from 'expo-location';
+import { useNavigation } from '@react-navigation/native';
+import Geocoder from 'react-native-geocoding';
 
-const PriceScreen = () => {
+Geocoder.init('AIzaSyBIV79qlfKN64XfXLYM4AMzXs9rMKsDobg');
+
+const MapScreen = ({ route, navigation }) => {
   const [initialRegion, setInitialRegion] = useState(null);
   const [selectedLocation, setSelectedLocation] = useState(null);
 
@@ -11,6 +15,14 @@ const PriceScreen = () => {
     const { coordinate } = event.nativeEvent;
     setSelectedLocation(coordinate);
     console.log(coordinate);
+  };
+
+  const handleLocationSelection = () => {
+    if (selectedLocation) {
+      const { onLocationSelected } = route.params;
+      onLocationSelected(selectedLocation);
+      navigation.goBack();
+    }
   };
 
   useEffect(() => {
@@ -53,10 +65,25 @@ const PriceScreen = () => {
       ) : (
         <Text>Loading...</Text>
       )}
-      <SafeAreaView style={styles.button}>
-        <TouchableOpacity style={styles.searchbtn}>
-          <Text style={{ fontSize: 24, fontWeight: 700 }}>위치 설정 완료</Text>
-        </TouchableOpacity>
+      <SafeAreaView style={styles.btn_content}>
+        {selectedLocation ? (
+          <TouchableOpacity
+            style={styles.searchbtn}
+            onPress={handleLocationSelection}
+          >
+            <Text
+              style={{ fontSize: 24, fontWeight: 700, textAlign: 'center' }}
+            >
+              위치 설정 완료
+            </Text>
+          </TouchableOpacity>
+        ) : (
+          <Text style={styles.placeholderText}>
+            위치를 선택해주세요:{' '}
+            {selectedLocation &&
+              `${selectedLocation.latitude}, ${selectedLocation.longitude}`}
+          </Text>
+        )}
       </SafeAreaView>
     </SafeAreaView>
   );
@@ -64,6 +91,7 @@ const PriceScreen = () => {
 
 const styles = StyleSheet.create({
   container: {
+    width: '100%',
     flex: 1,
   },
   map: {
@@ -88,4 +116,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default PriceScreen;
+export default MapScreen;

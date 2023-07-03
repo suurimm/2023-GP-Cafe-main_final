@@ -2,11 +2,12 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import HeaderLeftButton from '../components/HeaderLeftButton';
 import RecommendScreen from '../screens/RecommendScreen';
 import RecommendScreen2 from '../screens/RecommendScreen2';
+import MapScreen from '../screens/MapScreen';
 import ContentTab from './ContentTab';
 
 const Stack = createNativeStackNavigator();
 
-const AuthStack = () => {
+const RecommStack = () => {
   return (
     <Stack.Navigator
       initialRouteName="RecommendScreen"
@@ -25,6 +26,11 @@ const AuthStack = () => {
         options={{ title: '주소 설정' }}
       />
       <Stack.Screen
+        name="MapScreen"
+        component={MapScreen}
+        options={{ title: '주소 설정' }}
+      />
+      <Stack.Screen
         name="RecommendScreen2"
         component={RecommendScreen2}
         options={{ title: '목적 설정' }}
@@ -34,4 +40,4 @@ const AuthStack = () => {
   );
 };
 
-export default AuthStack;
+export default RecommStack;

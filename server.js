@@ -553,6 +553,13 @@ app.post("/data", (req, res) => {
 });
 ///
 
+app.post("/signup", (req, res) => {
+  const userData = req.body;
+
+  console.log("userData : ", userData);
+  res.status(200).json({ message: "회원가입이 성공적으로 완료되었습니다." });
+});
+
 // const cafe = require("./app/models/cafe.model.js");
 // let datacid_list = [];
 // cafe.getBrunch((err, data) => {
